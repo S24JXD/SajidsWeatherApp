@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Sajid's Weather App</title>
+        <link rel="stylesheet" href="style.css">
+    </head>
+
+    <body>
+        
+        <div class="card">
+
+            <button class="mode-toggle">
+                <span class="toggle-text">Toggle Dark Mode</span>
+            </button>
+
+            <button class="mode-toggle geolocation-button">
+                <span class="toggle-text">Get Weather for My Location</span>
+            </button>
+            
+            
+
+            <div class="search">
+                <input type="text" placeholder="enter city" 
+                spellcheck="false">
+                <button> <img src="images/search.png"> </button>
+             </div>
+
+             <div class="error">
+                <p>City not found, please try again</p>
+             </div>
+
+             <div class="weather">
+                <img src="images/rain.png" alt="" class="weather-icon">
+                <h1 class="temp">22°c</h1>
+                <h2 class="city">Manchester</h2>
+                <div class="details">
+                    <div class="col">
+                        <img src = "images/humidity.png">
+                        <div>
+                            <p class="humidity">50%</p>
+                            <p>Humidity</p>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <img src = "images/wind.png">
+                        <div>
+                            <p class="wind">15km/h</p>
+                            <p>Wind Speed</p>
+                        </div>
+                    </div>
+
+                </div>
+
+             </div>
+
+             <div class="loading">
+                <img src="images/loading.gif" alt="Loading...">
+             </div>
+
+        </div>
+
+        <script>
+
+            const apiKey = "f84df15ccd6b4ccbe7bcd49b50833b23";
+            const apiUrl = "https://api.openweathermap.org/data/2.5/weather?units=metric&q=";
+
+            const modeToggle = document.querySelector(".mode-toggle");
+const body = document.body;
+
+// Select the geolocation button
+const geolocationButton = document.querySelector(".geolocation-button");
+
+// Function to fetch weather data based on geolocation
+function getWeatherByGeolocation() {
+    if ("geolocation" in navigator) {
+        // Use the Geolocation API to get the user's position
+        navigator.geolocation.getCurrentPosition(async (position) => {
+            const latitude = position.coords.latitude;
+            const longitude = position.coords.longitude;
+            
+            // Create a URL for the OpenWeatherMap API using the user's coordinates
+            const geoUrl = `https://api.openweathermap.org/data/2.5/weather?units=metric&lat=${latitude}&lon=${longitude}&appid=${apiKey}`;
+            
+            // Fetch weather data based on the user's location
+            const response = await fetch(geoUrl);
+            const data = await response.json();
+            
+            // Call your function to display weather data (e.g., checkWeather)
+            checkWeather(data.name);
+        });
+    } else {
+        // Handle the case where geolocation is not supported by the browser
+        console.error("Geolocation is not supported by your browser.");
+    }
+}
+
+// Add an event listener to the geolocation button
+geolocationButton.addEventListener("click", getWeatherByGeolocation);
+
+
+// Function to toggle between light and dark modes
+function toggleDarkMode() {
+    body.classList.toggle("dark-mode");
+}
+
+// Event listener for the mode toggle button
+modeToggle.addEventListener("click", toggleDarkMode);
+
+            const searchBox = document.querySelector(".search input")
+            const searchBtn = document.querySelector(".search button")
+            const weatherIcon = document.querySelector(".weather-icon");
+
+            async function checkWeather(city){
+                document.querySelector(".loading").style.display = "block";
+                const response = await fetch(apiUrl + city + `&appid=${apiKey}`);
+                
+                if(response.status == 404) {
+                    document.querySelector(".error").style.display = "block";
+                    document.querySelector(".weather").style.display = "none";
+
+                }else{
+                    document.querySelector(".weather").style.display = "block"
+
+                }
+
+                document.querySelector(".loading").style.display = "none"
+
+                var data = await response.json();
+
+                //console.log(data);
+
+                document.querySelector(".city").innerHTML = data.name;
+                document.querySelector(".temp").innerHTML = Math.round( data.main.temp) + "°c";
+                document.querySelector(".humidity").innerHTML = data.main.humidity + "%";
+                document.querySelector(".wind").innerHTML = data.wind.speed + "km/h";
+
+                if(data.weather[0].main == "Clouds"){
+                    weatherIcon.src = "images/clouds.png";}     
+                else if(data.weather[0].main == "Clear"){
+                    weatherIcon.src = "images/clear.png";}  
+                else if(data.weather[0].main == "Rain"){
+                weatherIcon.src = "images/rain.png";}
+                else if(data.weather[0].main == "Drizzle"){
+                    weatherIcon.src = "images/drizzle.png";}   
+                    else if(data.weather[0].main == "Mist"){
+                    weatherIcon.src = "images/mist.png";}   
+
+                    document.querySelector(".error").style.display = "none";
+                    document.querySelector(".weather").style.display = "block"
+
+                    }
+            
+
+            searchBtn.addEventListener("click", ()=>{
+                checkWeather(searchBox.value);
+
+            })
+            //checkWeather(city);
+
+        </script>
+
+
+    </body>
+
+</html>
